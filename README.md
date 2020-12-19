@@ -70,10 +70,11 @@ event-loop 를 통해 요청한 client (subscriber) 에게 response 를 보내�
 
 앞서 언급했듯이 불필요한 resource 소모를 아껴 reactive 한 구도를 가져갈 수 있다.
 
+1. react 의 render 처럼 small data 에 대해 reactive 하게 구동 시킬 수 있다.
+2. resource 감소로 동 spec 대비 많은 traffic 처리가 가능하다.
+
 ## 단점
 
-사실 단점이 굉장히 많다.
-
-1. 굉장히 한정적인 상황에서만 사용 가능하다.
+1. 굉장히 한정적인 상황 (business logic 적으로) 에서만 사용 가능하다.
 2. async - Non-blocking 이기에 중간에 blocking 을 하나라도 잘못 쓰면 더더욱 느려진다.
   - Flux 를 이용해서 사용하던 도중 .log 를 사용 시 극단적으로 performance 가 떨어진다. 이유는 log method 는 blocking IO 이기에 이 method 때문에 효율이 안나오게 된다.
