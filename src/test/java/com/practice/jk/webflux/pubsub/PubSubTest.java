@@ -5,12 +5,17 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import org.springframework.boot.test.context.SpringBootTest;
 
-public class PubSub {
-	public static void main(String[] args) throws InterruptedException {
+@SpringBootTest
+class PubSubTest {
+
+	@Test
+	void pubSubTest() throws InterruptedException {
 		Iterable<Integer> iterable = Arrays.asList(1, 2, 3, 4, 5);
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -26,7 +31,7 @@ public class PubSub {
 							int i = 0;
 
 							try {
-								while(i++ <= n) {
+								while(i++ < n) {
 									if (iterator.hasNext()) {
 										s.onNext(iterator.next());
 									} else {
@@ -72,7 +77,8 @@ public class PubSub {
 		};
 
 		publisher.subscribe(subscriber);
-		executorService.awaitTermination(30, TimeUnit.SECONDS);
+		// thread 종료까지 기다려주지 않기에 error 발생, 5초 유예 추가
+		executorService.awaitTermination(5, TimeUnit.SECONDS);
 		executorService.shutdown();
 	}
 }
