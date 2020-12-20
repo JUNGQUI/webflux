@@ -19,38 +19,36 @@ class PubSubTest {
 		Iterable<Integer> iterable = Arrays.asList(1, 2, 3, 4, 5);
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-		Publisher<Integer> publisher = new Publisher<Integer>() {
-			@Override public void subscribe(Subscriber<? super Integer> s) {
+		Publisher<Integer> publisher = s -> {
 
-				// 여러 subscriber 가 존재할 수 있기 때문에 각 subscriber 에 대응하기 위해 iterator 를 각 subscribe 에서 만든다.
-				Iterator<Integer> iterator = iterable.iterator();
+			// 여러 subscriber 가 존재할 수 있기 때문에 각 subscriber 에 대응하기 위해 iterator 를 각 subscribe 에서 만든다.
+			Iterator<Integer> iterator = iterable.iterator();
 
-				s.onSubscribe(new Subscription() {
-					@Override public void request(long n) {
-						executorService.execute(() -> {
-							int i = 0;
+			s.onSubscribe(new Subscription() {
+				@Override public void request(long n) {
+					executorService.execute(() -> {
+						int i = 0;
 
-							try {
-								while(i++ < n) {
-									if (iterator.hasNext()) {
-										s.onNext(iterator.next());
-									} else {
-										s.onComplete();
-										break;
-									}
+						try {
+							while(i++ < n) {
+								if (iterator.hasNext()) {
+									s.onNext(iterator.next());
+								} else {
+									s.onComplete();
+									break;
 								}
-							} catch (RuntimeException e) {
-								// error 처리도 우아하게
-								s.onError(e);
 							}
-						});
-					}
+						} catch (RuntimeException e) {
+							// error 처리도 우아하게
+							s.onError(e);
+						}
+					});
+				}
 
-					@Override public void cancel() {
+				@Override public void cancel() {
 
-					}
-				});
-			}
+				}
+			});
 		};
 
 		Subscriber<Integer> subscriber = new Subscriber<Integer>() {
