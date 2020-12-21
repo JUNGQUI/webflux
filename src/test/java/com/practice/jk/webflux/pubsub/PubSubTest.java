@@ -1,10 +1,13 @@
 package com.practice.jk.webflux.pubsub;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -17,6 +20,8 @@ class PubSubTest {
 	@Test
 	void pubSubTest() throws InterruptedException {
 		Iterable<Integer> iterable = Arrays.asList(1, 2, 3, 4, 5);
+		List<Integer> copyIterable = new ArrayList<>();
+
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		Publisher<Integer> publisher = s -> {
@@ -62,6 +67,7 @@ class PubSubTest {
 
 			@Override public void onNext(Integer integer) {
 				System.out.println("onNext" + integer);
+				copyIterable.add(integer);
 				this.subscription.request(1);
 			}
 
@@ -76,7 +82,14 @@ class PubSubTest {
 
 		publisher.subscribe(subscriber);
 		// thread 종료까지 기다려주지 않기에 error 발생, 5초 유예 추가
-		executorService.awaitTermination(5, TimeUnit.SECONDS);
+		executorService.awaitTermination(1, TimeUnit.SECONDS);
 		executorService.shutdown();
+
+		Iterator<Integer> result = iterable.iterator();
+
+		for (int i = 0; i < 5; i++) {
+			Assertions.assertEquals(result.next(), copyIterable.get(i));
+		}
+
 	}
 }
