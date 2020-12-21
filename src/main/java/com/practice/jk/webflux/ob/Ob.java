@@ -1,20 +1,14 @@
 package com.practice.jk.webflux.ob;
 
-import java.util.Iterator;
+import java.util.Observable;
 
-public class Ob {
-	public static void main(String[] args) {
-		Iterable<Integer> integerIterableWithImplementAndLambda = () -> new Iterator<Integer>() {
-			int i = 0;
-			final static int MAX = 10;
-
-			@Override public boolean hasNext() {
-				return i < MAX;
-			}
-
-			@Override public Integer next() {
-				return ++i;
-			}
-		};
+// 참고 : java 9 부터 Observable 은 deprecated 되었다.
+public class Ob extends Observable implements Runnable {
+	@Override
+	public void run() {
+		for (int i = 0; i <= 10; i++) {
+			setChanged();
+			notifyObservers(i);
+		}
 	}
 }
