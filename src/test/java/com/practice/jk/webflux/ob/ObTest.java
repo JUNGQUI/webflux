@@ -59,9 +59,10 @@ class ObTest {
 
 		Ob intObserver = new Ob();
 		intObserver.addObserver(observer);
+		intObserver.run();
 
-//		for (int i = 0; i < 10; i++) {
-//			Assertions.assertEquals(integerList.get(i), integerByObserver.get(i));
-//		}
+		for (int i = 0; i < 10; i++) {
+			Assertions.assertEquals(integerList.get(i), integerByObserver.get(i));
+		}
 	}
 }
