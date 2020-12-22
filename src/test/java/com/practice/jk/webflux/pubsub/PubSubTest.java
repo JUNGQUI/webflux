@@ -93,10 +93,15 @@ class PubSubTest {
 	}
 
 	@Test
-	public void pubSubsimplifiedTest() throws InterruptedException {
+	public void pubSubsimplifiedTest() {
 		System.out.println("pub sub before simplified");
 		PubSub.pubSub();
 		System.out.println("pub sub after simplified");
 		PubSub.simplePubSub();
+	}
+
+	@Test
+	public void mapPublisherTest() {
+		PubSub.mapPublisher();
 	}
 }

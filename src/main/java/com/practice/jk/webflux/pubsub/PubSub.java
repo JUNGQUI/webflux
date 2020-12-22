@@ -2,6 +2,7 @@ package com.practice.jk.webflux.pubsub;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
@@ -52,6 +53,44 @@ public class PubSub {
 		Iterable<Integer> iterable = Stream.iterate(1, i -> i + 1).limit(10).collect(Collectors.toList());
 		Publisher<Integer> publisher = integerPublisher(iterable);
 		publisher.subscribe(logSubscriber());
+	}
+
+	public static void mapPublisher() {
+		Iterable<Integer> iterable = Stream.iterate(1, i -> i + 1).limit(10).collect(Collectors.toList());
+		Publisher<Integer> publisher = integerPublisher(iterable);
+		Publisher<Integer> mapPublisher = mapPublisher(publisher, i -> i * 10);
+		mapPublisher.subscribe(logSubscriber());
+	}
+
+	private static Publisher<Integer> mapPublisher(
+			Publisher<Integer> prevPublisher, Function<Integer, Integer> function
+	) {
+		return new Publisher<Integer>() {
+			@Override
+			public void subscribe(Subscriber<? super Integer> s) {
+				prevPublisher.subscribe(new Subscriber<Integer>() {
+					@Override
+					public void onSubscribe(Subscription subscription) {
+						s.onSubscribe(subscription);
+					}
+
+					@Override
+					public void onNext(Integer integer) {
+						s.onNext(function.apply(integer));
+					}
+
+					@Override
+					public void onError(Throwable t) {
+						s.onError(t);
+					}
+
+					@Override
+					public void onComplete() {
+						s.onComplete();
+					}
+				});
+			}
+		};
 	}
 
 	private static Publisher<Integer> integerPublisher(Iterable<Integer> iterator) {
