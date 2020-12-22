@@ -62,35 +62,63 @@ public class PubSub {
 		mapPublisher.subscribe(logSubscriber());
 	}
 
+	public static void sumPublisher() {
+		Iterable<Integer> iterable = Stream.iterate(1, i -> i + 1).limit(10).collect(Collectors.toList());
+		Publisher<Integer> publisher = integerPublisher(iterable);
+		Publisher<Integer> sumPublisher = sumPublisher(publisher);
+		sumPublisher.subscribe(logSubscriber());
+
+	}
+
 	private static Publisher<Integer> mapPublisher(
 			Publisher<Integer> prevPublisher, Function<Integer, Integer> function
 	) {
-		return new Publisher<Integer>() {
-			@Override
-			public void subscribe(Subscriber<? super Integer> s) {
-				prevPublisher.subscribe(new Subscriber<Integer>() {
-					@Override
-					public void onSubscribe(Subscription subscription) {
-						s.onSubscribe(subscription);
-					}
-
+		return s -> prevPublisher.subscribe(
+//				new Subscriber<Integer>() {
+//					@Override
+//					public void onSubscribe(Subscription subscription) {
+//						s.onSubscribe(subscription);
+//					}
+//
+//					@Override
+//					public void onNext(Integer integer) {
+//						s.onNext(function.apply(integer));
+//					}
+//
+//					@Override
+//					public void onError(Throwable t) {
+//						s.onError(t);
+//					}
+//
+//					@Override
+//					public void onComplete() {
+//						s.onComplete();
+//					}
+//				}
+				new DeligateSubscriber(s) {
 					@Override
 					public void onNext(Integer integer) {
 						s.onNext(function.apply(integer));
 					}
+				}
+				);
+	}
 
-					@Override
-					public void onError(Throwable t) {
-						s.onError(t);
-					}
+	private static Publisher<Integer> sumPublisher(Publisher<Integer> prevPublisher) {
+		return s -> prevPublisher.subscribe(new DeligateSubscriber(s) {
+			int sum = 0;
 
-					@Override
-					public void onComplete() {
-						s.onComplete();
-					}
-				});
+			@Override
+			public void onNext(Integer integer) {
+				sum += integer;
 			}
-		};
+
+			@Override
+			public void onComplete() {
+				s.onNext(sum);
+				s.onComplete();
+			}
+		});
 	}
 
 	private static Publisher<Integer> integerPublisher(Iterable<Integer> iterator) {
@@ -110,6 +138,15 @@ public class PubSub {
 
 			}
 		});
+	}
+
+	private static Publisher<Integer> reducePublisher(Publisher<Integer> prevPublisher) {
+		return new Publisher<Integer>() {
+			@Override
+			public void subscribe(Subscriber<? super Integer> s) {
+
+			}
+		};
 	}
 
 	private static Subscriber<Integer> logSubscriber() {

@@ -93,7 +93,7 @@ class PubSubTest {
 	}
 
 	@Test
-	public void pubSubsimplifiedTest() {
+	void pubSubsimplifiedTest() {
 		System.out.println("pub sub before simplified");
 		PubSub.pubSub();
 		System.out.println("pub sub after simplified");
@@ -101,7 +101,12 @@ class PubSubTest {
 	}
 
 	@Test
-	public void mapPublisherTest() {
+	void mapPublisherTest() {
 		PubSub.mapPublisher();
+	}
+
+	@Test
+	void sumPublisherTest() {
+		PubSub.sumPublisher();
 	}
 }
