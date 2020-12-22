@@ -2,17 +2,15 @@ package com.practice.jk.webflux.pubsub;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 public class PubSub {
-	public static void main(String[] args) throws InterruptedException {
-		Iterable<Integer> iterable = Arrays.asList(1, 2, 3, 4, 5);
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
+	public static void pubSub() {
+		Iterable<Integer> iterable = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
 		Publisher<Integer> publisher = new Publisher<Integer>() {
 			@Override public void subscribe(Subscriber<? super Integer> s) {
@@ -22,23 +20,21 @@ public class PubSub {
 
 				s.onSubscribe(new Subscription() {
 					@Override public void request(long n) {
-						executorService.execute(() -> {
-							int i = 0;
+						int i = 0;
 
-							try {
-								while(i++ <= n) {
-									if (iterator.hasNext()) {
-										s.onNext(iterator.next());
-									} else {
-										s.onComplete();
-										break;
-									}
+						try {
+							while(i++ <= n) {
+								if (iterator.hasNext()) {
+									s.onNext(iterator.next());
+								} else {
+									s.onComplete();
+									break;
 								}
-							} catch (RuntimeException e) {
-								// error 처리도 우아하게
-								s.onError(e);
 							}
-						});
+						} catch (RuntimeException e) {
+							// error 처리도 우아하게
+							s.onError(e);
+						}
 					}
 
 					@Override public void cancel() {
@@ -48,7 +44,62 @@ public class PubSub {
 			}
 		};
 
-		Subscriber<Integer> subscriber = new Subscriber<Integer>() {
+		publisher.subscribe(integerSubscriber());
+//		publisher.subscribe(logSubscriber());
+	}
+
+	public static void simplePubSub () {
+		Iterable<Integer> iterable = Stream.iterate(1, i -> i + 1).limit(10).collect(Collectors.toList());
+		Publisher<Integer> publisher = integerPublisher(iterable);
+		publisher.subscribe(logSubscriber());
+	}
+
+	private static Publisher<Integer> integerPublisher(Iterable<Integer> iterator) {
+		return s -> s.onSubscribe(new Subscription() {
+			@Override
+			public void request(long n) {
+				try {
+					iterator.forEach(s::onNext);
+					s.onComplete();
+				} catch (Exception ex) {
+					s.onError(ex);
+				}
+			}
+
+			@Override
+			public void cancel() {
+
+			}
+		});
+	}
+
+	private static Subscriber<Integer> logSubscriber() {
+		return new Subscriber<Integer>() {
+			@Override
+			public void onSubscribe(Subscription s) {
+				System.out.println("onSubscribe:");
+				s.request(Long.MAX_VALUE);
+			}
+
+			@Override
+			public void onNext(Integer integer) {
+				System.out.println("onNext:" + integer);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				System.out.println("onError:" + t.getMessage());
+			}
+
+			@Override
+			public void onComplete() {
+				System.out.println("onComplete");
+			}
+		};
+	}
+
+	private static Subscriber<Integer> integerSubscriber() {
+		return new Subscriber<Integer>() {
 			Subscription subscription; // 위의 iterator 와 마찬가지, subscribe 를 저장하기 위해 subscription 수정
 
 			@Override public void onSubscribe(Subscription s) {
@@ -70,9 +121,5 @@ public class PubSub {
 				System.out.println("onComplete");
 			}
 		};
-
-		publisher.subscribe(subscriber);
-		executorService.awaitTermination(30, TimeUnit.SECONDS);
-		executorService.shutdown();
 	}
 }

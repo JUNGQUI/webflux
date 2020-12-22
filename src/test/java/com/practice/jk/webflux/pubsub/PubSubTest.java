@@ -90,6 +90,13 @@ class PubSubTest {
 		for (int i = 0; i < 5; i++) {
 			Assertions.assertEquals(result.next(), copyIterable.get(i));
 		}
+	}
 
+	@Test
+	public void pubSubsimplifiedTest() throws InterruptedException {
+		System.out.println("pub sub before simplified");
+		PubSub.pubSub();
+		System.out.println("pub sub after simplified");
+		PubSub.simplePubSub();
 	}
 }
