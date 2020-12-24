@@ -30,16 +30,30 @@ public class WebFluxController {
 //    Mono<String> bodyToResult = result.flatMap(cr -> cr.bodyToMono(String.class));
 //    // 1 과 2 는 동일
 
+//    return webClient.get()
+//        .uri("http://localhost:8080/service?req={req}", idx)
+//        .exchange()
+//        .flatMap(cr -> cr.bodyToMono(String.class))
+//        .flatMap(
+//            string -> webClient.get()
+//                .uri("http://localhost:8080/service2?req={req}", string)
+//                .exchange()
+//        )
+//        .flatMap(cr -> cr.bodyToMono(String.class))
+//        // asyncService
+//        .flatMap(request -> Mono.fromCompletionStage(
+//            asyncService.asyncService(request))
+//        );
+
+    // deprecated 된 부분 수정, flatMap 을 통해 mapper 를 쓰던 것을 exchange 와 동시에 수정하게 변경
     return webClient.get()
         .uri("http://localhost:8080/service?req={req}", idx)
-        .exchange()
-        .flatMap(cr -> cr.bodyToMono(String.class))
+        .exchangeToMono(request -> request.bodyToMono(String.class))
         .flatMap(
             string -> webClient.get()
                 .uri("http://localhost:8080/service2?req={req}", string)
-                .exchange()
+                .exchangeToMono(request -> request.bodyToMono(String.class))
         )
-        .flatMap(cr -> cr.bodyToMono(String.class))
         // asyncService
         .flatMap(request -> Mono.fromCompletionStage(
             asyncService.asyncService(request))
