@@ -16,7 +16,13 @@ spring 5 에서부터 리액티브 프로그래밍을 지원하기 위해 도입
 
 ## 원리?
 
-주요 쟁점은 event loop 방식이라고 볼 수 있다.
+주요 원리는 event-driven 방식을 이용했다고 볼 수 있다.
+
+> event-driven
+> 
+> 기존의 방식이 thread 가 request 를 전달받았을 경우 처음부터 끝까지 (response 까지) 책임을 져 다른 작업을 하지 못하는 반면
+> event-driven 방식은 request 를 받아 service 에 전달하고 해당 thread 는 다른 작업을 진행하되 response 가 만들어졌다면 event 를 발생시켜
+> thread 에게 response 를 client 에 전달하는 방식을 의미한다.
 
 기존의 전통적인 servlet base MVC spring 을 보면 이와 같다.
 
