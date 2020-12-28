@@ -100,6 +100,10 @@ stream 이란 연속적인 데이터의 흐름을 뜻한다. 이러한 흐름의
 server 에서 할당받은 work 가 끝났을 때 (publisher) 
 event-loop 를 통해 요청한 client (subscriber) 에게 response 를 보내게 된다.
 
+### 3. Back Pressure
+
+
+
 ## 장점
 
 앞서 언급했듯이 불필요한 resource 소모를 아껴 reactive 한 구도를 가져갈 수 있다.
