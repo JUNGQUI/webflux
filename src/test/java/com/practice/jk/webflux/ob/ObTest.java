@@ -49,12 +49,9 @@ class ObTest {
 		List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		List<Integer> integerByObserver = new ArrayList<>();
 
-		Observer observer = new Observer() {
-			@Override
-			public void update(Observable o, Object arg) {
-				integerByObserver.add((Integer) arg);
-				System.out.println(arg);
-			}
+		Observer observer = (o, arg) -> {
+			integerByObserver.add((Integer) arg);
+			System.out.println(arg);
 		};
 
 		Ob intObserver = new Ob();
