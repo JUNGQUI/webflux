@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 public class AsyncService {
 
   public CompletableFuture<String> asyncService(String request) {
-    return CompletableFuture.completedFuture("AsyncService" + request);
+    return CompletableFuture.completedFuture("AsyncService " + request);
   }
 }
