@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +70,11 @@ public class WebFluxController {
     return webClient.get()
         .uri("http://localhost:8080/service3?req={req}", idx)
         .exchangeToFlux(request -> request.bodyToFlux(String.class));
+  }
+
+  @GetMapping(value = "/rest/flux/event-stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public Flux<String> fluxEventStream () {
+    return Flux.fromIterable(Arrays.asList("string1", "string2", "string3"));
   }
 
   @GetMapping(value = "/service")
