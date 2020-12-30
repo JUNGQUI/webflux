@@ -306,7 +306,26 @@ public class PublisherSubscriber {
 위에서 `publisher.subscribe(subscriber())` 를 통해 subscriber() 가 publisher 를 구독하고
 구현한 publisher 에서 전달받은 subscriber 를 통해 request 를 받을 경우 next, 완료되었다 가정하고 complete를 던진다.
 
-이때 이 onComplete 가 완료되었다는 것을 publisher 에 전달하는 것으로 한번의 request 를 종료하게 된다.
+```java
+public class request_onNext {
+   @Override public void request(long n) {
+     for (int i = 0; i < n; i++) {
+        s.onNext(1);     // Subscriber.onNext(PARAMETER) 를 통해 값 전달 
+     }
+
+     s.onComplete();  // 완료 후 완료 처리
+   }
+
+   @Override public void onNext(Integer integer) {
+      System.out.println("onNext" + integer);   // 비즈니스 로직 처리
+      this.subscription.request(1);             // Subscriber 가 구독하는 subscription (즉, publisher) 에
+      // request 를 보내는데, Subscriber 가 감당할 수 있는 개수인 1을 전달
+   }
+}
+```
+
+위 코드와 같이 publisher 는 완료 후 onComplete() 를 통해 subscriber 에 완료 시그널을 보낼 수 있고, subscriber 의 경우 자신이 감당 가능한 수준의
+resource 를 publisher 에게 요청하게 되는데, 현재 코드에서는 무조건 1개의 값만을 보내게 되어 있다.
 
 > 당연하게도, 이렇게 구현을 한다 하더라도 양쪽 모두 비동기 형식을 취하지 않는다면 비동기형으로 동작하지 않는다.
 > 
@@ -315,15 +334,3 @@ public class PublisherSubscriber {
 > 왜 그런지 원인 파악을 하던 중 .log() 가 동기식 I/O 였기에 발생한 성능 이슈였다.
 > 따라서 이와 같이 설계를 할 때 주의해야 한다. 
 
-## 장점
-
-앞서 언급했듯이 불필요한 resource 소모를 아껴 reactive 한 구도를 가져갈 수 있다.
-
-1. react 의 render 처럼 small data 에 대해 reactive 하게 구동 시킬 수 있다.
-2. resource 감소로 동 spec 대비 많은 traffic 처리가 가능하다.
-
-## 단점
-
-1. 굉장히 한정적인 상황 (business logic 적으로) 에서만 사용 가능하다.
-2. async - Non-blocking 이기에 중간에 blocking 을 하나라도 잘못 쓰면 더더욱 느려진다.
-  - Flux 를 이용해서 사용하던 도중 .log 를 사용 시 극단적으로 performance 가 떨어진다. 이유는 log method 는 blocking IO 이기에 이 method 때문에 효율이 안나오게 된다.
