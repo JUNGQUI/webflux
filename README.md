@@ -25,22 +25,9 @@ Reactive Programming 에서 알아야 할 것들이 많다.
    - Observer Pattern
    - Pub - Sub Pattern
 
-### 1. Reactive Stream
+`README 를 나눠서 기록하기로 하였다.`
 
-stream 이란 연속적인 데이터의 흐름을 뜻한다. 이러한 흐름의 앞에 Reactive 가 접두로 붙었다는 것은 말 그대로
-연속적인 데이터를 `즉각 반응` 할 수 있게 만들었다는 뜻이다.
-
-다음은 [리액티브 스트림](http://reactive-streams.org) 에서 이야기 하는 정의다.
-
-> Reactive Streams is an initiative to provide a standard for asynchronous stream processing with non-blocking back pressure.
-
-쉽게 말해 `Non-blocking, Back pressure 를 이용한 비동기 stream 처리의 표준` 이라고 볼 수 있다.
-
-위 예시로 들었듯이 검색창의 자동완성 기능의 경우 입력되는 단어에 대해 유추되는 검색어가 즉각적으로 보여지는 기능의 경우 
-검색어가 즉각적으로 client 에 의해 수시로 변경되기에 각 요청에 대해 thread 가 server 의 반응을 모두 기다렸다가 전달하기엔
-매우 낮은 performance 를 보여준다. 
-
-이러한 처리들을 위한 표준이 Reactive stream 이라 볼 수 있다.
+### [1. Reactive Stream](/src/main/java/com/practice/jk/webflux/readme/ReactiveStream.md)
 
 ### 2. Event-Driven (event loop)
 
@@ -334,3 +321,6 @@ resource 를 publisher 에게 요청하게 되는데, 현재 코드에서는 무
 > 왜 그런지 원인 파악을 하던 중 .log() 가 동기식 I/O 였기에 발생한 성능 이슈였다.
 > 따라서 이와 같이 설계를 할 때 주의해야 한다. 
 
+### 부록 - CompletableFuture
+
+java 에서 async 하게 접근이 가능한 부분이 있는데
