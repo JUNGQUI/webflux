@@ -47,7 +47,7 @@ public class WebFluxController {
         );
   }
 
-  @GetMapping(value = "/rest/mono/single")
+  @GetMapping(value = "/rest/mono/error")
   public String monoSingle (@RequestParam(value = "idx") int idx) {
     // webflux 로 구현 시 block 하면 error 발생
     return Mono.zip(webClient.get()
@@ -68,7 +68,7 @@ public class WebFluxController {
                 .map(String::valueOf)
                 .collect(Collectors.joining(", "))
             ))
-        ).flux().toStream().findFirst().orElse("J Tag");
+        ).flux().toStream().findFirst().orElse("ERROR MUST BE OCCURRED!!");
   }
 
   @GetMapping(value = "/rest/flux")
