@@ -152,3 +152,4 @@ public class JKCompletableFuture {
 
 이렇게 할 경우 기존의 간단한 작업만 수행했던 부분에 대해 내부에 exception 에 대해서도 유동적으로 조절이 가능하며 안에 다른 로직을 추가로
 생성할 수 있다.
+
