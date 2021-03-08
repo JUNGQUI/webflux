@@ -87,9 +87,10 @@ public class WebFluxController {
   @GetMapping(value = "/service")
   public String service(@RequestParam(value = "req") String req) {
     try {
+      System.out.println(Thread.currentThread().getId() + " thread running");
       Thread.sleep(3000);
     } catch (Exception ex) {
-      System.out.println("J Tag");
+      System.out.println("J Tag, error " + ex.getMessage());
     }
 
     return req + " service1";
@@ -98,9 +99,10 @@ public class WebFluxController {
   @GetMapping(value = "/service2")
   public String service2(@RequestParam(value = "req") String req) {
     try {
-      Thread.sleep(3000);
+      System.out.println(Thread.currentThread().getId() + " thread running");
+      Thread.sleep(5000);
     } catch (Exception ex) {
-      System.out.println("J Tag");
+      System.out.println("J Tag, error " + ex.getMessage());
     }
 
     return req + " service2";
@@ -111,10 +113,24 @@ public class WebFluxController {
     return new ArrayList<>(Arrays.asList(req, "this", "is", "flux"));
   }
 
-  @GetMapping(value = "/service4")
-  public Mono<String> service4() {
+  @GetMapping(value = "/mono/zip/service")
+  public Mono<String> zipDirect() {
     try {
       return monoFluxService.multiMono();
+    } catch (Exception ex) {
+      return Mono.just(ex.getMessage());
+    }
+  }
+
+  @GetMapping(value = "/mono/zip/controller")
+  public Mono<String> zipFromController() {
+    try {
+      return Mono.zip(
+          Mono.just(monoFluxService.longService())
+          , Mono.just(monoFluxService.smallService())
+      ).flatMap(tuple ->
+          Mono.just(tuple.getT1() + " " + tuple.getT2())
+      ).subscribeOn(Schedulers.parallel());
     } catch (Exception ex) {
       return Mono.just(ex.getMessage());
     }

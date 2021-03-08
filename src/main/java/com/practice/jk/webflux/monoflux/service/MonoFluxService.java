@@ -7,18 +7,20 @@ import reactor.core.scheduler.Schedulers;
 @Component
 public class MonoFluxService {
 
-  public Mono<String> longService() throws Exception {
+  public String longService() throws Exception {
     Thread.sleep(2000);
-    return Mono.just(Thread.currentThread().getId() + " long").subscribeOn(Schedulers.boundedElastic());
+    return Thread.currentThread().getId() + " long";
   }
 
-  public Mono<String> smallService() throws Exception {
+  public String smallService() throws Exception {
     Thread.sleep(1000);
-    return Mono.just(Thread.currentThread().getId() + " small").subscribeOn(Schedulers.boundedElastic());
+    return Thread.currentThread().getId() + " small";
   }
 
   public Mono<String> multiMono() throws Exception {
-    return Mono.zip(this.longService(), this.smallService())
+    return Mono.zip(
+        Mono.just(this.longService()).subscribeOn(Schedulers.parallel())
+        , Mono.just(this.smallService()).subscribeOn(Schedulers.parallel()))
         .flatMap(tuple -> Mono.just(
             tuple.getT1()
                 + tuple.getT2()
