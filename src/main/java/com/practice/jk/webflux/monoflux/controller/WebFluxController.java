@@ -1,6 +1,7 @@
 package com.practice.jk.webflux.monoflux.controller;
 
 import com.practice.jk.webflux.monoflux.service.AsyncService;
+import com.practice.jk.webflux.monoflux.service.MonoFluxService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,12 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequiredArgsConstructor
 public class WebFluxController {
 
   private final AsyncService asyncService;
+  private final MonoFluxService monoFluxService;
 
   WebClient webClient = WebClient.create();
 
@@ -90,5 +93,14 @@ public class WebFluxController {
   @GetMapping(value = "/service3")
   public List<String> service3(@RequestParam(value = "req") String req) {
     return new ArrayList<>(Arrays.asList(req, "this", "is", "flux"));
+  }
+
+  @GetMapping(value = "/service4")
+  public Mono<String> service4() {
+    try {
+      return monoFluxService.multiMono();
+    } catch (Exception ex) {
+      return Mono.just(ex.getMessage());
+    }
   }
 }

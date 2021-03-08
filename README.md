@@ -27,7 +27,7 @@ Reactive Programming 에서 알아야 할 것들이 많다.
 
 `README 를 나눠서 기록하기로 하였다.`
 
-### [1. Reactive Stream](/src/main/java/com/practice/jk/webflux/readme/ReactiveStream.md)
+### 1. [Reactive Stream](/src/main/java/com/practice/jk/webflux/readme/ReactiveStream.md)
 
 ### 2. [Event-Driven (event loop)](/src/main/java/com/practice/jk/webflux/readme/EventDriven.md)
 
