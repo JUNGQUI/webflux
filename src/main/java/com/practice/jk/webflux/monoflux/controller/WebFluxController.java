@@ -5,6 +5,7 @@ import com.practice.jk.webflux.monoflux.service.MonoFluxService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,46 +27,49 @@ public class WebFluxController {
 
   @GetMapping(value = "/rest/mono")
   public Mono<String> mono (@RequestParam(value = "idx") int idx) {
-//    Mono<ClientResponse> result = webClient.get()         // method 정의
-//        .uri("http://localhost:8080/service?req={req}", idx)              // url 지정
-//        .exchange();  // 실행, 실행을 하게 되면 publisher.subscribe 와 동일한 효과가 spring boot 를 통해 처리된다.
-//
-//    // 1.
-//    ClientResponse clientResponse = null;
-//    Mono<String> body = clientResponse.bodyToMono(String.class);
-//
-//    // 2.
-//    Mono<String> bodyToResult = result.flatMap(cr -> cr.bodyToMono(String.class));
-//    // 1 과 2 는 동일
-
-//    return webClient.get()
-//        .uri("http://localhost:8080/service?req={req}", idx)
-//        .exchange()
-//        .flatMap(cr -> cr.bodyToMono(String.class))
-//        .flatMap(
-//            string -> webClient.get()
-//                .uri("http://localhost:8080/service2?req={req}", string)
-//                .exchange()
-//        )
-//        .flatMap(cr -> cr.bodyToMono(String.class))
-//        // asyncService
-//        .flatMap(request -> Mono.fromCompletionStage(
-//            asyncService.asyncService(request))
-//        );
-
-    // deprecated 된 부분 수정, flatMap 을 통해 mapper 를 쓰던 것을 exchange 와 동시에 수정하게 변경
-    return webClient.get()
+    return Mono.zip(webClient.get()
         .uri("http://localhost:8080/service?req={req}", idx)
-        .exchangeToMono(request -> request.bodyToMono(String.class))
-        .flatMap(
-            string -> webClient.get()
-                .uri("http://localhost:8080/service2?req={req}", string)
-                .exchangeToMono(request -> request.bodyToMono(String.class))
+        .retrieve()
+        .bodyToMono(String.class)
+        .subscribeOn(Schedulers.boundedElastic()),
+        webClient.get()
+            .uri("http://localhost:8080/service2?req={req}", idx)
+            .retrieve()
+            .bodyToMono(String.class)
+            .subscribeOn(Schedulers.boundedElastic())
         )
         // asyncService
         .flatMap(request -> Mono.fromCompletionStage(
-            asyncService.asyncService(request))
+            asyncService.asyncService(request.toList()
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", "))
+            ))
         );
+  }
+
+  @GetMapping(value = "/rest/mono/error")
+  public String monoSingle (@RequestParam(value = "idx") int idx) {
+    // webflux 로 구현 시 block 하면 error 발생
+    return Mono.zip(webClient.get()
+            .uri("http://localhost:8080/service?req={req}", idx)
+            .retrieve()
+            .bodyToMono(String.class)
+            .subscribeOn(Schedulers.boundedElastic()),
+        webClient.get()
+            .uri("http://localhost:8080/service2?req={req}", idx)
+            .retrieve()
+            .bodyToMono(String.class)
+            .subscribeOn(Schedulers.boundedElastic())
+    )
+        // asyncService
+        .flatMap(request -> Mono.fromCompletionStage(
+            asyncService.asyncService(request.toList()
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", "))
+            ))
+        ).flux().toStream().findFirst().orElse("ERROR MUST BE OCCURRED!!");
   }
 
   @GetMapping(value = "/rest/flux")
@@ -82,11 +86,23 @@ public class WebFluxController {
 
   @GetMapping(value = "/service")
   public String service(@RequestParam(value = "req") String req) {
+    try {
+      Thread.sleep(3000);
+    } catch (Exception ex) {
+      System.out.println("J Tag");
+    }
+
     return req + " service1";
   }
 
   @GetMapping(value = "/service2")
   public String service2(@RequestParam(value = "req") String req) {
+    try {
+      Thread.sleep(3000);
+    } catch (Exception ex) {
+      System.out.println("J Tag");
+    }
+
     return req + " service2";
   }
 
