@@ -1,6 +1,7 @@
 package com.practice.jk.webflux.monoflux.controller;
 
 import com.practice.jk.webflux.monoflux.service.AsyncService;
+import com.practice.jk.webflux.monoflux.service.MonoFluxService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @RestController
@@ -21,6 +21,7 @@ import reactor.core.scheduler.Schedulers;
 public class WebFluxController {
 
   private final AsyncService asyncService;
+  private final MonoFluxService monoFluxService;
 
   WebClient webClient = WebClient.create();
 
@@ -86,9 +87,10 @@ public class WebFluxController {
   @GetMapping(value = "/service")
   public String service(@RequestParam(value = "req") String req) {
     try {
+      System.out.println(Thread.currentThread().getId() + " thread running");
       Thread.sleep(3000);
     } catch (Exception ex) {
-      System.out.println("J Tag");
+      System.out.println("J Tag, error " + ex.getMessage());
     }
 
     return req + " service1";
@@ -97,9 +99,10 @@ public class WebFluxController {
   @GetMapping(value = "/service2")
   public String service2(@RequestParam(value = "req") String req) {
     try {
-      Thread.sleep(3000);
+      System.out.println(Thread.currentThread().getId() + " thread running");
+      Thread.sleep(5000);
     } catch (Exception ex) {
-      System.out.println("J Tag");
+      System.out.println("J Tag, error " + ex.getMessage());
     }
 
     return req + " service2";
@@ -108,5 +111,28 @@ public class WebFluxController {
   @GetMapping(value = "/service3")
   public List<String> service3(@RequestParam(value = "req") String req) {
     return new ArrayList<>(Arrays.asList(req, "this", "is", "flux"));
+  }
+
+  @GetMapping(value = "/mono/zip/service")
+  public Mono<String> zipDirect() {
+    try {
+      return monoFluxService.multiMono();
+    } catch (Exception ex) {
+      return Mono.just(ex.getMessage());
+    }
+  }
+
+  @GetMapping(value = "/mono/zip/controller")
+  public Mono<String> zipFromController() {
+    try {
+      return Mono.zip(
+          Mono.just(monoFluxService.longService())
+          , Mono.just(monoFluxService.smallService())
+      ).flatMap(tuple ->
+          Mono.just(tuple.getT1() + " " + tuple.getT2())
+      ).subscribeOn(Schedulers.parallel());
+    } catch (Exception ex) {
+      return Mono.just(ex.getMessage());
+    }
   }
 }
