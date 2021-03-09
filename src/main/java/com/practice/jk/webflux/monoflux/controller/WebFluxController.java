@@ -125,9 +125,11 @@ public class WebFluxController {
   @GetMapping(value = "/mono/zip/controller")
   public Mono<String> zipFromController() {
     try {
+      Mono<String> firstMono = Mono.just(monoFluxService.longService()).subscribeOn(Schedulers.parallel());
+      Mono<String> secondMono = Mono.just(monoFluxService.smallService()).subscribeOn(Schedulers.parallel());
+
       return Mono.zip(
-          Mono.just(monoFluxService.longService())
-          , Mono.just(monoFluxService.smallService())
+          firstMono, secondMono
       ).flatMap(tuple ->
           Mono.just(tuple.getT1() + " " + tuple.getT2())
       ).subscribeOn(Schedulers.parallel());

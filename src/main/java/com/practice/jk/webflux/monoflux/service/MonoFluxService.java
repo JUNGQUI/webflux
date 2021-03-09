@@ -10,26 +10,26 @@ import reactor.core.scheduler.Schedulers;
 public class MonoFluxService {
 
   public String longService() throws Exception {
-//    this.logging("long");
-//    Thread.sleep(2000);
+    this.logging("long");
+    Thread.sleep(2000);
     this.logging("long");
     return Thread.currentThread().getId() + " long";
   }
 
   public String smallService() throws Exception {
-//    this.logging("small");
-//    Thread.sleep(1000);
+    this.logging("small");
+    Thread.sleep(1000);
     this.logging("small");
     return Thread.currentThread().getId() + " small";
   }
 
   public Mono<String> multiMono() throws Exception {
-    return Mono.zip(
-        Mono.just(this.longService())
-            .subscribeOn(Schedulers.parallel())
-        , Mono.just(this.smallService())
-            .subscribeOn(Schedulers.parallel())
-    )
+    Mono<String> firstMono = Mono.just(this.longService())
+        .subscribeOn(Schedulers.parallel());
+    Mono<String> secondMono = Mono.just(this.smallService())
+        .subscribeOn(Schedulers.parallel());
+
+    return Mono.zip(firstMono, secondMono)
         .subscribeOn(Schedulers.parallel())
         .flatMap(
             tuple -> Mono.just(tuple.getT1() + "\n" + tuple.getT2())
