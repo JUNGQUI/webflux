@@ -18,8 +18,13 @@ class MonoFluxTest {
 		MonoFlux.simpleFlux();
 	}
 
+	// TODO 해당 request 에 대해 multi 로 신청하는 것 처럼 변경
+	// Verify 중에 있다고 함
 	@Test
 	void publishByFlux() {
+		MonoFlux.publishByFlux();
+		MonoFlux.publishByFlux();
+		MonoFlux.publishByFlux();
 		MonoFlux.publishByFlux();
 	}
 
