@@ -20,7 +20,13 @@ public class MonoFlux {
 			}
 
 			@Override public void onNext(Integer integer) {
-				System.out.println("onNext:" + integer);
+				try {
+					Thread.sleep(1000);
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+				}
+
+				System.out.println("onNext:" + Thread.currentThread().getId() + " " + integer);
 			}
 
 			@Override public void onError(Throwable t) {

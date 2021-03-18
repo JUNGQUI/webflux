@@ -13,21 +13,21 @@ public class MonoFluxService {
     this.logging("long");
     Thread.sleep(2000);
     this.logging("long");
-    return Thread.currentThread().getId() + " long";
+    return "long";
   }
 
   public String smallService() throws Exception {
     this.logging("small");
     Thread.sleep(1000);
     this.logging("small");
-    return Thread.currentThread().getId() + " small";
+    return "small";
   }
 
   public Mono<String> multiMono() throws Exception {
     Mono<String> firstMono = Mono.just(this.longService())
-        .subscribeOn(Schedulers.parallel());
+        .subscribeOn(Schedulers.boundedElastic());
     Mono<String> secondMono = Mono.just(this.smallService())
-        .subscribeOn(Schedulers.parallel());
+        .subscribeOn(Schedulers.boundedElastic());
 
     return Mono.zip(firstMono, secondMono)
         .subscribeOn(Schedulers.parallel())
