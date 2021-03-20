@@ -3,36 +3,51 @@ package com.practice.jk.webflux.monoflux.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @Component
 public class MonoFluxService {
 
-  public String longService() throws Exception {
-    this.logging("long");
-    Thread.sleep(2000);
-    this.logging("long");
-    return "long";
+  public String longService() {
+    try {
+      this.logging("long");
+      Thread.sleep(2000);
+      this.logging("long");
+      return "long";
+    } catch (Exception ex) {
+      return "long";
+    }
   }
 
-  public String smallService() throws Exception {
-    this.logging("small");
-    Thread.sleep(1000);
-    this.logging("small");
-    return "small";
+  public String smallService() {
+    try {
+      this.logging("small");
+      Thread.sleep(1000);
+      this.logging("small");
+      return "small";
+    } catch (Exception ex) {
+      return "small";
+    }
   }
 
-  public Mono<String> multiMono() throws Exception {
-    Mono<String> firstMono = Mono.just(this.longService())
-        .subscribeOn(Schedulers.boundedElastic());
-    Mono<String> secondMono = Mono.just(this.smallService())
-        .subscribeOn(Schedulers.boundedElastic());
+  public Mono<String> multiMono() {
+    Mono<String> firstMono = Mono.just(this.longService());
+    Mono<String> secondMono = Mono.just(this.smallService());
 
     return Mono.zip(firstMono, secondMono)
-        .subscribeOn(Schedulers.parallel())
-        .flatMap(
-            tuple -> Mono.just(tuple.getT1() + "\n" + tuple.getT2())
+        .flatMap(t -> Mono.just(t)
+            .map(tuple -> tuple.getT1() + "\n" + tuple.getT2())
+            .subscribeOn(Schedulers.parallel())
+        );
+  }
+
+  public Flux<String> multiMonoWithFlux() {
+    return Flux.just("1", "2", "3")
+        .flatMap(n -> Mono.just(n)
+            .map(p -> p + " " + this.longService() + " " + this.smallService() + "\n")
+            .subscribeOn(Schedulers.parallel())
         );
   }
 

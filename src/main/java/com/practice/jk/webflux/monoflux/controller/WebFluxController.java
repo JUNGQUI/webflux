@@ -122,6 +122,11 @@ public class WebFluxController {
     }
   }
 
+  @GetMapping(value = "/flux/service")
+  public Flux<String> fluxMultiThread() {
+    return monoFluxService.multiMonoWithFlux();
+  }
+
   @GetMapping(value = "/mono/zip/controller")
   public Mono<String> zipFromController() {
     try {
