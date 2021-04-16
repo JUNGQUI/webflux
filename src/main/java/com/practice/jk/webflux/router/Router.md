@@ -81,3 +81,40 @@ public class RouterController {
 
 또한 여러 조건들을 같이 사용 할 경우 코드가 점점 복잡해지고 길어질수록 오히려 장점이 된다.
 
+#### nest
+
+앞서 이야기한 것처럼 route 를 통해 controller 역할을 수행 할 수 있다고 했는데 여러가지를 체이닝해서 사용 할 경우 헷갈릴수도 있고
+일괄적으로 처리하지 못할 경우 가독성에 문제가 생긴다. 그럴 때 사용하는게 nest 다.
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class RouterController {
+
+  @Bean
+  public RouterFunction<?> helloRouterFunction() {
+    return nest(path("/user")
+        , route(
+            GET("/hello"), request -> ok().body(
+                just("SOME RESPONSE"), String.class
+            )
+        ).andRoute(
+            GET("/hi"), request -> ok().body(
+                just("SOME RESPONSE HI"), String.class)
+        ).andRoute(
+            POST("/helloHi"), request -> ok().body(
+                just("SOME RESPONE HELLO AND HI"), String.class)
+            )
+        );
+  }
+}
+```
+
+위와 같이 구현을 한 경우 최상위 path 에 `/user` 가 있고, 그 아래로 `/hello`, `/hi`, `/hellohi` 가 있다.
+
+이와 같이 하나의 최상위 path 아래에 여러 controller 를 붙일 경우 nest 를 쓴다.
+
+또한 이렇게 하나로 묶어서 구현을 할 경우 `path` 함수를 사용하였기에 체이닝을 통해 or, and, accept 등 다양한 조건을 통해 controller
+구현을 할 수 있으며 spring security 를 통해 url 권한 제어 또한 적용된다.
