@@ -1,5 +1,6 @@
 package com.practice.jk.webflux.async;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -87,18 +88,65 @@ public class JKCompletableFuture {
 		return localList;
 	}
 
-	public List<String> asyncJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
-
+	public List<String> syncJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
 		return jkCompletableObject.stream()
 				.map(this::joinIdAndPassword)
 				.collect(Collectors.toList());
 	}
 
+	public List<String> asyncJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
+		int i = 0;
+		List<JKCompletableObject> odd = new ArrayList<>();
+		List<JKCompletableObject> even = new ArrayList<>();
+
+		for (JKCompletableObject jk : jkCompletableObject) {
+			if (i % 2 == 0) {
+				even.add(jk);
+			} else {
+				odd.add(jk);
+			}
+
+			i++;
+		}
+
+		CompletableFuture<List<String>> evenResult = this.completableFutureJoinIdAndPassword(even);
+		CompletableFuture<List<String>> oddResult = this.completableFutureJoinIdAndPassword(odd);
+
+		CompletableFuture<List<String>> finalResult = CompletableFuture.allOf(evenResult, oddResult)
+				.thenApplyAsync(aVoid -> {
+					List<String> e = evenResult.join();
+					List<String> o = oddResult.join();
+					List<String> r = new ArrayList<>();
+					r.addAll(e);
+					r.addAll(o);
+
+					return r;
+				});
+
+		return finalResult.join();
+	}
+
 	private String joinIdAndPassword(JKCompletableObject jkCompletableObject) {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception ex) {
+
+		}
+
 		return jkCompletableObject.getId() + "|" + jkCompletableObject.getPassword();
 	}
 
-	private CompletableFuture<String> completableFutureJoinIdAndPassword(JKCompletableObject jkCompletableObject) {
-		return CompletableFuture.supplyAsync(() -> jkCompletableObject.getId() + "|" + jkCompletableObject.getPassword());
+	private CompletableFuture<List<String>> completableFutureJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception ex) {
+
+		}
+
+		return CompletableFuture.supplyAsync(() ->
+				jkCompletableObject.stream()
+						.map(jk -> jk.getId() + "|" + jk.getPassword())
+						.collect(Collectors.toList())
+				, threadPoolTaskExecutor);
 	}
 }

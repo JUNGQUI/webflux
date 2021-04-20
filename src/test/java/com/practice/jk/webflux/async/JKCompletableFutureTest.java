@@ -22,6 +22,29 @@ class JKCompletableFutureTest {
         new JKCompletableObject("id4", "password4"),
         new JKCompletableObject("id5", "password5")
     );
+    List<String> result = jkCompletableFuture.syncJoinIdAndPassword(jkCompletableObjectList);
+
+    result.forEach(
+        res -> {
+          System.out.println(res);
+          Assertions.assertThat(res)
+              .contains("id")
+              .contains("|")
+              .contains("password");
+        }
+    );
+  }
+
+  @Test
+  void asyncJoinTest() {
+    List<JKCompletableObject> jkCompletableObjectList = Arrays.asList(
+        new JKCompletableObject("id1", "password1"),
+        new JKCompletableObject("id2", "password2"),
+        new JKCompletableObject("id3", "password3"),
+        new JKCompletableObject("id4", "password4"),
+        new JKCompletableObject("id5", "password5")
+    );
+
     List<String> result = jkCompletableFuture.asyncJoinIdAndPassword(jkCompletableObjectList);
 
     result.forEach(
