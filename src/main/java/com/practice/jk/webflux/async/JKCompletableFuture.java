@@ -1,14 +1,22 @@
 package com.practice.jk.webflux.async;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class JKCompletableFuture {
 
-	public static List<JKCompletableObject> jkCompletableObjectList = Arrays.asList(
+	private final Executor threadPoolTaskExecutor;
+
+	public List<JKCompletableObject> jkCompletableObjectList = Arrays.asList(
 			new JKCompletableObject("id1", "password1"),
 			new JKCompletableObject("id2", "password2"),
 			new JKCompletableObject("id3", "password3"),
@@ -16,7 +24,7 @@ public class JKCompletableFuture {
 			new JKCompletableObject("id5", "password5")
 	);
 
-	public static List<JKCompletableObject> syncList() {
+	public List<JKCompletableObject> syncList() {
 		long startTime = System.nanoTime();
 
 		List<JKCompletableObject> localList = jkCompletableObjectList.stream()
@@ -36,7 +44,7 @@ public class JKCompletableFuture {
 		return localList;
 	}
 
-	public static List<JKCompletableObject> syncListParallel() {
+	public List<JKCompletableObject> syncListParallel() {
 		long startTime = System.nanoTime();
 
 		List<JKCompletableObject> localList = jkCompletableObjectList.parallelStream()
@@ -56,7 +64,7 @@ public class JKCompletableFuture {
 		return localList;
 	}
 
-	public static List<JKCompletableObject> asyncCompletableFuture() {
+	public List<JKCompletableObject> asyncCompletableFuture() {
 		long startTime = System.nanoTime();
 
 		List<CompletableFuture<JKCompletableObject>> completableFutureList = jkCompletableObjectList.stream()
@@ -78,5 +86,67 @@ public class JKCompletableFuture {
 		System.out.println("Async List : " + TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS));
 
 		return localList;
+	}
+
+	public List<String> syncJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
+		return jkCompletableObject.stream()
+				.map(this::joinIdAndPassword)
+				.collect(Collectors.toList());
+	}
+
+	public List<String> asyncJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
+		int i = 0;
+		List<JKCompletableObject> odd = new ArrayList<>();
+		List<JKCompletableObject> even = new ArrayList<>();
+
+		for (JKCompletableObject jk : jkCompletableObject) {
+			if (i % 2 == 0) {
+				even.add(jk);
+			} else {
+				odd.add(jk);
+			}
+
+			i++;
+		}
+
+		CompletableFuture<List<String>> evenResult = this.completableFutureJoinIdAndPassword(even);
+		CompletableFuture<List<String>> oddResult = this.completableFutureJoinIdAndPassword(odd);
+
+		CompletableFuture<List<String>> finalResult = CompletableFuture.allOf(evenResult, oddResult)
+				.thenApplyAsync(aVoid -> {
+					List<String> e = evenResult.join();
+					List<String> o = oddResult.join();
+					List<String> r = new ArrayList<>();
+					r.addAll(e);
+					r.addAll(o);
+
+					return r;
+				});
+
+		return finalResult.join();
+	}
+
+	private String joinIdAndPassword(JKCompletableObject jkCompletableObject) {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception ex) {
+
+		}
+
+		return jkCompletableObject.getId() + "|" + jkCompletableObject.getPassword();
+	}
+
+	private CompletableFuture<List<String>> completableFutureJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception ex) {
+
+		}
+
+		return CompletableFuture.supplyAsync(() ->
+				jkCompletableObject.stream()
+						.map(jk -> jk.getId() + "|" + jk.getPassword())
+						.collect(Collectors.toList())
+				, threadPoolTaskExecutor);
 	}
 }
