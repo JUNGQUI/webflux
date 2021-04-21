@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class JKFuture {
+	private static final int timeout = 5;
 	public static void SimpleFuture() {
 		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -17,7 +18,7 @@ public class JKFuture {
 		someOtherWork();
 
 		try {
-			doubleFuture.get(1, TimeUnit.SECONDS);
+			doubleFuture.get(timeout, TimeUnit.SECONDS);
 		} catch (Exception ex) {
 			System.out.println("There is error Occur!");
 		}
@@ -44,8 +45,8 @@ public class JKFuture {
 		System.out.println("Some Other work" + Thread.currentThread());
 	}
 
-	private static void someLongWork() throws InterruptedException {
-		Thread.sleep(5000);
+	public static void someLongWork() throws InterruptedException {
+		Thread.sleep((timeout - 1) * 1000);
 		System.out.println("Some Long work" + Thread.currentThread());
 	}
 }
