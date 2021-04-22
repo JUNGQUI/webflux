@@ -42,9 +42,10 @@ public class JKFuture {
 ```java
 public class Test {
   void futureAsyncTest() throws ExecutionException, InterruptedException {
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    ExecutorService executorService1 = Executors.newSingleThreadExecutor();
+    ExecutorService executorService2 = Executors.newSingleThreadExecutor();
 
-    Future<Double> result1 = executorService.submit(() -> {
+    Future<Double> result1 = executorService1.submit(() -> {
       try {
         JKFuture.someLongWork();
       } catch (InterruptedException e) {
@@ -54,7 +55,7 @@ public class Test {
       return 1D;
     });
 
-    Future<Double> result2 = executorService.submit(() -> {
+    Future<Double> result2 = executorService2.submit(() -> {
       try {
         JKFuture.someLongWork();
       } catch (InterruptedException e) {
@@ -63,7 +64,15 @@ public class Test {
 
       return 2D;
     });
-
+    
+    // ...
   }
 }
 ```
+
+이 코드의 경우 실행할 경우 각기 다른 thread 가 지정되어 있기에 각자 비동기로 작동하게 될 것이다.
+
+하지만 각각의 결과를 합치기 위해 각자 get 을 진행하기 때문에 만약 서로 다른 작업을 수행했고 그 작업의 시간을 동시에 끝난다는 가정을 하기
+어렵다면, 두 결과를 하나로 합치는 로직은 수행이 안될 것이다.
+
+이런 두 가지 이상의 로직을 동시에 수행해서 결과로 합산하기 위해 CompletableFuture 가 생겨났다.
