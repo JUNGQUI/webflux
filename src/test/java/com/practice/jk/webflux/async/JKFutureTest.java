@@ -45,6 +45,33 @@ class JKFutureTest {
 			return 2D;
 		});
 
+		Future<Double> result3 = executorService.submit(() -> {
+			try {
+				JKFuture.someLongWork();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return 3D;
+		});
+
+		Future<Double> result4 = executorService.submit(() -> {
+			try {
+				JKFuture.someLongWork();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return 4D;
+		});
+
+		System.out.println("Some Other Work");
+
+		Assertions.assertEquals(1D, result1.get());
+		Assertions.assertEquals(2D, result2.get());
+		Assertions.assertEquals(3D, result3.get());
+		Assertions.assertEquals(4D, result4.get());
+
 	}
 
 	@Test
