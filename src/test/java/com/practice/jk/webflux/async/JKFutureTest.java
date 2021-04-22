@@ -23,9 +23,12 @@ class JKFutureTest {
 
 	@Test
 	void futureAsyncTest() throws ExecutionException, InterruptedException {
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		ExecutorService executorService1 = Executors.newSingleThreadExecutor();
+		ExecutorService executorService2 = Executors.newSingleThreadExecutor();
+		ExecutorService executorService3 = Executors.newSingleThreadExecutor();
+		ExecutorService executorService4 = Executors.newSingleThreadExecutor();
 
-		Future<Double> result1 = executorService.submit(() -> {
+		Future<Double> result1 = executorService1.submit(() -> {
 			try {
 				JKFuture.someLongWork();
 			} catch (InterruptedException e) {
@@ -35,7 +38,7 @@ class JKFutureTest {
 			return 1D;
 		});
 
-		Future<Double> result2 = executorService.submit(() -> {
+		Future<Double> result2 = executorService2.submit(() -> {
 			try {
 				JKFuture.someLongWork();
 			} catch (InterruptedException e) {
@@ -44,6 +47,33 @@ class JKFutureTest {
 
 			return 2D;
 		});
+
+		Future<Double> result3 = executorService3.submit(() -> {
+			try {
+				JKFuture.someLongWork();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return 3D;
+		});
+
+		Future<Double> result4 = executorService4.submit(() -> {
+			try {
+				JKFuture.someLongWork();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return 4D;
+		});
+
+		System.out.println("Some Other Work");
+
+		Assertions.assertEquals(1D, result1.get());
+		Assertions.assertEquals(2D, result2.get());
+		Assertions.assertEquals(3D, result3.get());
+		Assertions.assertEquals(4D, result4.get());
 
 	}
 
