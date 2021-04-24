@@ -1,4 +1,4 @@
-### 1. Reactive Stream
+### Reactive Stream
 
 stream 이란 연속적인 데이터의 흐름을 뜻한다. 이러한 흐름의 앞에 Reactive 가 접두로 붙었다는 것은 말 그대로
 연속적인 데이터를 `즉각 반응` 할 수 있게 만들었다는 뜻이다.
