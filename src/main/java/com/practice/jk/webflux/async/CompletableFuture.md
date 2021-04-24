@@ -37,11 +37,11 @@ public class JKFuture {
 
 해당 코드는 얼핏 보기엔 이상이 없어보인다.
 
-하지만 문제는 해당 Future 로 이루어진 다수의 method 를 하나의 method 에서 호출하고, 이 결과를 합쳐서 보여주는 로직이 있다고 가정해보자.
+하지만 문제는 서로 다른 동시성에 대해 문제가 발생한다는건데, 해당 Future 로 이루어진 다수의 method 를 하나의 method 에서 호출하고, 이 결과를 합쳐서 보여주는 로직이 있다고 가정해보자.
 
 ```java
 public class Test {
-  void futureAsyncTest() throws ExecutionException, InterruptedException {
+  Double futureAsyncTest() throws ExecutionException, InterruptedException {
     ExecutorService executorService1 = Executors.newSingleThreadExecutor();
     ExecutorService executorService2 = Executors.newSingleThreadExecutor();
 
@@ -64,16 +64,18 @@ public class Test {
 
       return 2D;
     });
-    
-    // ...
+
+    CompletableFuture<Double> finalResult = CompletableFuture.allOf(result1, result2)
+
+
+    return finalResult.join();
   }
 }
 ```
+기존의 코드의 경우 각자 비동기로 작동한다 하더라도 결과값에 대해 return 할 경우 각자 다른 작업시간으로 인해 서로 다른 결과값을 반환 할 경우가 빈번하게 될 것이다.
 
-이 코드의 경우 실행할 경우 각기 다른 thread 가 지정되어 있기에 각자 비동기로 작동하게 될 것이다.
+그에 반해 위 코드의 경우 실행할 경우 각기 다른 thread 가 지정되어 있기에 각자 비동기로 작동하는데, 그 이유로는 마지막 줄에 key 가 있다.
 
-하지만 각각의 결과를 합치기 위해 각자 get 을 진행하기 때문에 만약 서로 다른 작업을 수행했고 그 작업의 시간을 동시에 끝난다는 가정을 하기
-어렵다면, 두 결과를 하나로 합치는 로직은 수행이 안될 것이다.
 
 이런 두 가지 이상의 로직을 동시에 수행해서 결과로 합산하기 위해 CompletableFuture 가 생겨났다.
 
@@ -148,4 +150,6 @@ thread 를 할당해주었고 작업은 전달받은 Collection stream 에서 id
 로 join 하여 결과를 반환한다.
 
 이렇게 할 경우 각기 다른 CompletableFuture 작업에 대해 비동기로 처리하되, 모든 작업이 완료된 이후 하나의 결과로 합쳐서 전달하게 된다.
+
+`CompletableFuture<Double> finalResult = CompletableFuture.allOf(result1, result2)` 를 보면 result1, result2 를 받아서 최종 결과값이 나오기 전까지 기다리며, 
 
