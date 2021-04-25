@@ -153,3 +153,7 @@ thread 를 할당해주었고 작업은 전달받은 Collection stream 에서 id
 
 `CompletableFuture<Double> finalResult = CompletableFuture.allOf(result1, result2)` 를 보면 result1, result2 를 받아서 최종 결과값이 나오기 전까지 기다리며, 
 
+chaining 을 통해 연결된 메소드 `thenApplyAsync` 내에서 결과값을 합쳐서 새로운 result 로 뽑아내는 것을 볼 수 있다.
+
+이와 같이 Future 와는 다르게 CompletableFuture 는 CompletableStage 를 상속받아 만들어졌기에 서로 다른 비동기 처리에 대한 결과를
+비동기로 다시 하나의 결과로 조합해서 사용이 가능하다.

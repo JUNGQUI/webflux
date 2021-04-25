@@ -69,12 +69,13 @@ class JKFutureTest {
 		});
 
 		System.out.println("Some Other Work");
-
 		Assertions.assertEquals(1D, result1.get());
+		System.out.println("Intercepted Some Other Work1");
 		Assertions.assertEquals(2D, result2.get());
+		System.out.println("Intercepted Some Other Work2");
 		Assertions.assertEquals(3D, result3.get());
 		Assertions.assertEquals(4D, result4.get());
-
+		System.out.println("Intercepted Some Other Work3");
 	}
 
 	@Test

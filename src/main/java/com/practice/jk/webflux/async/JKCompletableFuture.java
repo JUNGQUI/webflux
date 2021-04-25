@@ -110,11 +110,13 @@ public class JKCompletableFuture {
 		}
 
 		CompletableFuture<List<String>> evenResult = this.completableFutureJoinIdAndPassword(even);
+		System.out.println(Thread.currentThread() + " intercept work");
 		CompletableFuture<List<String>> oddResult = this.completableFutureJoinIdAndPassword(odd);
 
 		CompletableFuture<List<String>> finalResult = CompletableFuture.allOf(evenResult, oddResult)
 				.thenApplyAsync(aVoid -> {
 					List<String> e = evenResult.join();
+					System.out.println(Thread.currentThread() + " intercept work, in allof");
 					List<String> o = oddResult.join();
 					List<String> r = new ArrayList<>();
 					r.addAll(e);
@@ -137,6 +139,7 @@ public class JKCompletableFuture {
 	}
 
 	private CompletableFuture<List<String>> completableFutureJoinIdAndPassword(List<JKCompletableObject> jkCompletableObject) {
+		System.out.println(Thread.currentThread() + " intercept work, in private");
 		try {
 			Thread.sleep(1000);
 		} catch (Exception ex) {
