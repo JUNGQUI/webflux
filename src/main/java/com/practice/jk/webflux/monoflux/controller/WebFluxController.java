@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -125,6 +127,11 @@ public class WebFluxController {
   @GetMapping(value = "/flux/service")
   public Flux<String> fluxMultiThread() {
     return monoFluxService.multiMonoWithFlux();
+  }
+
+  @GetMapping(value = "/flux/service/serverResponse")
+  public Mono<ServerResponse> fluxMultiThreadServerResponse() {
+    return ServerResponse.ok().body(BodyInserters.fromValue(monoFluxService.multiMonoWithFlux()));
   }
 
   @GetMapping(value = "/mono/zip/controller")
